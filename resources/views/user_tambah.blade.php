@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Form Tambah Data User</h1>
-    <form action="/user/tambah_simpan" method="post">
+    <form  method="post" action="/user/tambah_simpan">
         {{ csrf_field() }}
 
         <label>Username</label>
