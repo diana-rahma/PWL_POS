@@ -121,9 +121,13 @@ class UserController extends Controller
 
 
         // crud
-        $user = UserModel::all();
-        return view('user', ['data' => $user]);
+        // $user = UserModel::all();
+        // return view('user', ['data' => $user]);
 
+        // relation
+        $user = UserModel::with('level')->get();
+        return view('user', ['data' => $user]);
+        // dd($user);
         
     }
 
