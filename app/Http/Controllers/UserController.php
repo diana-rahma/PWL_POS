@@ -159,9 +159,11 @@ class UserController extends Controller
         return redirect('/user');
     }
 
-    public function deleteUser($id)
+    public function hapus($id)
     {
-        DB::table('m_user')->where('user_id', $id)->delete();
-        return response()->json(['message' => 'User berhasil dihapus']);
+        $user = UserModel::find($id);
+        $user->delete();
+
+        return redirect('/user');
     }
 }
