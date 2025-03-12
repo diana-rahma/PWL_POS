@@ -120,11 +120,11 @@ class UserController extends Controller
         // dd($user->wasChanged(['nama', 'username']));
 
 
-        // crud
+        // // crud
         // $user = UserModel::all();
         // return view('user', ['data' => $user]);
 
-        // relation
+        // // relation
         $user = UserModel::with('level')->get();
         return view('user', ['data' => $user]);
         // dd($user);
@@ -134,6 +134,7 @@ class UserController extends Controller
     public function tambah(){
         return view('user_tambah');
     }
+    
 
     public function tambah_simpan(Request $request){
         UserModel::create([
