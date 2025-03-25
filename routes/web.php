@@ -31,6 +31,8 @@ Route::group(['prefix' => 'user'], function(){
     Route::get('/{id}/edit', [UserController::class, 'edit']);
     Route::put('/{id}', [UserController::class, 'update']);
     Route::post('user/list', [UserController::class, 'list'])->name('user.list');
+    Route::get('/{id}/edit_ajax', [UserController::class, 'edit_ajax']);
+    Route::put('/{id}/update_ajax', [UserController::class, 'update_ajax']);
     Route::delete('/{id}', [UserController::class, 'destroy']);
 });
 
