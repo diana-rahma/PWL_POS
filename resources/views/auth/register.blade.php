@@ -5,7 +5,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login Pengguna</title>
+    <title>Buat akun Pengguna</title>
      <!-- Google Font: Source Sans Pro --> 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"> 
     <!-- Font Awesome --> 
@@ -17,27 +17,21 @@
     <!-- Theme style --> 
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}"> 
 </head>
-<body class="hold-transition login-page">
-    <div class="login-box">
-        <!-- /.login-logo -->
+<body class="hold-transition register-page">
+    <div class="register-box">
+        <!-- /.register-logo -->
         <div class="card card-outline card-primary">
           <div class="card-header text-center">
-            <a href="{{ url('/') }}" class="h1"><b>Admin</b>LTE</a>
+            <a href="{{ url('/login') }}" class="h1"><b>Admin</b>LTE</a>
           </div>
           <div class="card-body">
-            <p class="login-box-msg">Sign in to start your session</p>
+            <p class="register-box-msg">Buat akun anda</p>
       
-            <form action="{{ url('login') }}" method="POST" id="form-login">
+            <form action="{{ url('register_proses') }}" method="POST" id="form-register">
               @csrf
       
               <div class="input-group mb-3">
-                <input 
-                  type="text" 
-                  id="username" 
-                  name="username" 
-                  class="form-control" 
-                  placeholder="Username"
-                >
+                <input  type="text" id="username" name="username" class="form-control" placeholder="Username">
                 <div class="input-group-append">
                   <div class="input-group-text">
                     <span class="fas fa-envelope"></span>
@@ -45,15 +39,19 @@
                 </div>
               </div>
               <small id="error-username" class="error-text text-danger"></small>
+
+              <div class="input-group mb-3">
+                <input type="text" id="nama" name="nama" class="form-control" placeholder="Nama">
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <span class="fas fa-user"></span>
+                  </div>
+                </div>
+              </div>
+              <small id="error-nama" class="error-text text-danger"></small>
       
               <div class="input-group mb-3">
-                <input 
-                  type="password" 
-                  id="password" 
-                  name="password" 
-                  class="form-control" 
-                  placeholder="Password"
-                >
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password">
                 <div class="input-group-append">
                   <div class="input-group-text">
                     <span class="fas fa-lock"></span>
@@ -61,34 +59,31 @@
                 </div>
               </div>
               <small id="error-password" class="error-text text-danger"></small>
+
+              <div class="form-group">
+                <select name="level_id" id="level_id" class="form-control" required >
+                    <option value="">- Pilih Level -</option>
+                    <option value="1">ADMIN</option>
+                    <option value="2">MANAGER</option>
+                    <option value="3">STAFF</option>
+                </select>
+                <small id="error-level_id" class="error-text form-text text-danger"></small>
+            </div>
       
               <div class="row">
-                <div class="col-8">
-                  <div class="icheck-primary">
-                    <input type="checkbox" id="remember">
-                    <label for="remember">Remember Me</label>
-                  </div>
-                </div>
-                <!-- /.col -->
-                <div class="col-4">
-                  <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-primary btn-block">Buat Akun</button>
                 </div>
                 <!-- /.col -->
               </div>
-              <br>
-              <div class="row">
-                <div class="col-10">
-                    <p>Belum punya akun? <a href="{{route('register')}}" class="text-center">Klik Disini</a></p>
-                    
-                </div>
-              </div>
+              
             </form>
           </div>
           <!-- /.card-body -->
         </div>
         <!-- /.card -->
       </div>
-      <!-- /.login-box -->
+      <!-- /.register-box -->
        
     <!-- jQuery --> 
     <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script> 
@@ -110,18 +105,20 @@
     }); 
 
     $(document).ready(function() { 
-    $("#form-login").validate({ 
+    $("#form-register").validate({ 
         rules: { 
         username: {required: true, minlength: 4, maxlength: 20}, 
-        password: {required: true, minlength: 6, maxlength: 20} 
+        nama: {required: true, minlength: 4, maxlength: 20}, 
+        password: {required: true, minlength: 6, maxlength: 20},
+        level_id: {required: true, minlength: 1, maxlength: 2}
         }, 
-        submitHandler: function(form) { // ketika valid, maka bagian yg akan dijalankan 
+        submitHandler: function(form) {  
         $.ajax({ 
             url: form.action, 
             type: form.method, 
             data: $(form).serialize(), 
             success: function(response) { 
-            if(response.status){ // jika sukses 
+            if(response.status){ 
                 Swal.fire({ 
                     icon: 'success', 
                     title: 'Berhasil', 
@@ -129,7 +126,7 @@
                 }).then(function() { 
                     window.location = response.redirect; 
                 }); 
-            }else{ // jika error 
+            }else{  
                 $('.error-text').text(''); 
                 $.each(response.msgField, function(prefix, val) { 
                     $('#error-'+prefix).text(val[0]); 
