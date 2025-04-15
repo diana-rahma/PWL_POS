@@ -5,6 +5,7 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\KategoriController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LevelController;
+use App\Http\Controllers\StokController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WelcomeController;
@@ -33,7 +34,7 @@ Route::middleware(['auth'])->group(function(){
     Route::get('/', [WelcomeController::class,'index']);
 
     // user
-    Route::prefix('user')->middleware(['authorize:ADM,MNG'])->group(function(){
+    Route::prefix('user')->middleware(['authorize:ADM'])->group(function(){
         Route::get('/', [UserController::class, 'index']);
         Route::post('/list', [UserController::class, 'list']);
         Route::get('/create', [UserController::class, 'create']);
@@ -52,7 +53,7 @@ Route::middleware(['auth'])->group(function(){
     });
 
     // barang 
-    Route::prefix('barang')->middleware(['authorize:ADM'])->group(function(){
+    Route::prefix('barang')->middleware(['authorize:ADM,MNG,STF'])->group(function(){
         Route::get('/', [BarangController::class, 'index']);
         Route::post('/list', [BarangController::class, 'list']);
         Route::get('/create', [BarangController::class, 'create']);
@@ -68,11 +69,14 @@ Route::middleware(['auth'])->group(function(){
         Route::get('/{id}/delete_ajax', [BarangController::class, 'confirm_ajax']);
         Route::delete('/{id}/delete_ajax', [BarangController::class, 'delete_ajax']);
         Route::delete('/{id}', [BarangController::class, 'destroy']);
+        Route::get('/import', [BarangController::class, 'import']);
+        Route::post('/import_ajax', [BarangController::class, 'import_ajax']);
+        Route::get('/export_excel', [BarangController::class, 'export_excel']);
     });
 
 
     // kategori
-    Route::middleware(['authorize:ADM'], function(){
+    Route::prefix('kategori')->middleware(['authorize:ADM,STF'])->group(function(){
         Route::get('/', [KategoriController::class, 'index']);
         Route::post('/list', [KategoriController::class, 'list']);
         Route::get('/create', [KategoriController::class, 'create']);
@@ -88,6 +92,25 @@ Route::middleware(['auth'])->group(function(){
         Route::get('/{id}/delete_ajax', [KategoriController::class, 'confirm_ajax']);
         Route::delete('/{id}/delete_ajax', [KategoriController::class, 'delete_ajax']);
         Route::delete('/{id}', [KategoriController::class, 'destroy']);
+    });
+
+    // stok
+    Route::prefix('stok')->middleware(['authorize:ADM,STF'])->group(function(){
+        Route::get('/', [StokController::class, 'index']);
+        Route::post('/list', [StokController::class, 'list']);
+        Route::get('/create', [StokController::class, 'create']);
+        Route::post('/', [StokController::class, 'store']);
+        Route::get('/create_ajax', [StokController::class, 'create_ajax']);
+        Route::post('/ajax', [StokController::class, 'store_ajax']);
+        Route::get('/{id}', [StokController::class, 'show']);
+        Route::get('/{id}/edit', [StokController::class, 'edit']);
+        Route::put('/{id}', [StokController::class, 'update']);
+        Route::post('stok/list', [StokController::class, 'list'])->name('stok.list');
+        Route::get('/{id}/edit_ajax', [StokController::class, 'edit_ajax']);
+        Route::put('/{id}/update_ajax', [StokController::class, 'update_ajax']);
+        Route::get('/{id}/delete_ajax', [StokController::class, 'confirm_ajax']);
+        Route::delete('/{id}/delete_ajax', [StokController::class, 'delete_ajax']);
+        Route::delete('/{id}', [StokController::class, 'destroy']);
     });
 
     // level
@@ -111,7 +134,7 @@ Route::middleware(['auth'])->group(function(){
 
 
     // supplier
-    Route::prefix('supplier')->middleware(['authorize:ADM'])->group(function(){
+    Route::prefix('supplier')->middleware(['authorize:ADM,MNG,STF'])->group(function(){
         Route::get('/', [SupplierController::class, 'index']);
         Route::post('/list', [SupplierController::class, 'list']);
         Route::get('/create', [SupplierController::class, 'create']);
