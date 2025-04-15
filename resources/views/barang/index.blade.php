@@ -5,8 +5,9 @@
     <div class="card-header">
         <h3 class="card-title">{{ $page->title }}</h3>
         <div class="card-tools">
-            <a class="btn btn-sm btn-primary mt-1" href="{{ url('barang/create') }}">Tambah</a>
-            <button onclick="modalAction('{{ url('/barang/create_ajax') }}')" class="btn btn-sm btn- success mt-1">Tambah Ajax</button>
+            <button onclick="modalAction('{{ url('/barang/import') }}')" class="btn btn-info mt-1">Import Barang</button>
+            <a href="{{ url('/barang/export_excel') }}" class="btn btn-primary"><i class="fa fa-file- excel"></i> Export Barang</a>
+            <button onclick="modalAction('{{ url('/barang/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
         </div>
     </div>
 
@@ -59,12 +60,14 @@
         function modalAction(url = ''){
             $('#myModal').load(url,function(){
             $('#myModal').modal('show');
-            });
+        });
+
         }
         var dataBarang;
         $(document).ready(function(){
             dataBarang = $('#table_barang').DataTable({
                 // serverSide: true, jika ingin menggunakan server side processing
+                processing: true,
                 serverSide: true,
                 ajax: {
                     "url": "{{ url('barang/list') }}",
@@ -118,6 +121,13 @@
                     }
                 ]
             });
+
+            $('#table-barang_filter input').unbind().bind().on('keyup', function(e){ if(e.keyCode == 13){ // enter key
+                tableBarang.search(this.value).draw();
+                }
+            });
+
+
             $('#kategori_id').on('change', function(){
                 dataBarang.ajax.reload();
             });
