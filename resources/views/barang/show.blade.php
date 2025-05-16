@@ -8,7 +8,7 @@
     </div>
     
     <div class="card-body">
-        @empty($kategori)
+        @empty($stok)
             <div class="alert alert-danger alert-dismissible">
                 <h5><i class="icon fas fa-ban"></i> Kesalahan!</h5>
                 Data yang Anda cari tidak ditemukan.
@@ -17,27 +17,27 @@
             <table class="table table-bordered table-striped table-hover table-sm">
                 <tr>
                     <th>ID</th>
-                    <td>{{ $kategori->barang_id }}</td>
+                    <td>{{ $stok->barang_id }}</td>
                 </tr>
                 <tr>
                     <th>Kategori</th>
-                    <td>{{ $kategori->kategori->kategori_nama }}</td>
+                    <td>{{ $stok->kategori->kategori_nama }}</td>
                 </tr>
                 <tr>
                     <th>Kode Barang</th>
-                    <td>{{ $kategori->barang_kode }}</td>
+                    <td>{{ $stok->barang_kode }}</td>
                 </tr>
                 <tr>
                     <th>Nama Barang</th>
-                    <td>{{ $kategori->barang_nama }}</td>
+                    <td>{{ $stok->barang_nama }}</td>
                 </tr>
                 <tr>
                     <th>Harga Beli</th>
-                    <td>{{ $kategori->harga_beli }}</td>
+                    <td>{{ $stok->harga_beli }}</td>
                 </tr>
                 <tr>
                     <th>Harga Jual</th>
-                    <td>{{ $kategori->harga_jual }}</td>
+                    <td>{{ $stok->harga_jual }}</td>
                 </tr>
             </table>
         @endempty

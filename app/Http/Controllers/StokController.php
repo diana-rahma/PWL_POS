@@ -2,45 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SupplierModel;
+use App\Models\BarangModel;
+use App\Models\StokModel;
+use App\Models\UserModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
-class SupplierController extends Controller
+class StokController extends Controller
 {
     public function index(){
         $breadcrumb = (object)[
-            'title' => 'Data Supplier',
-            'list' => ['Home', 'Supplier']
+            'title' => 'Stok Barang',
+            'list' => ['Home', 'Stok']
         ];
 
         $page = (object)[
-            'title' => 'Daftar Supplier Barang'
+            'title' => 'Stok barang yang tersedia'
         ];
 
-        $activeMenu = 'supplier';
+        $activeMenu = 'stok';
 
-        return view('supplier.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu]);
+        $stok = StokModel::all();
+
+        return view('stok.index', ['breadcrumb' => $breadcrumb, 'page' => $page,'stok' => $stok, 'activeMenu' => $activeMenu]);
+        
     }
 
+
     public function list(Request $request){
-        $supplier = SupplierModel::select('supplier_id', 'supplier_kode', 'supplier_nama', 'alamat');
+        $stok = StokModel::select('stok_id', 'stok_tanggal', 'stok_jumlah', 'barang_id', 'user_id')->with('barang', 'user');
 
         // filter
-        // if ($request->supplier_id) {
-        //     $supplier->where('supplier_id', $request->supplier_id);
-        // }
+        if ($request->filter_stok) {
+            $stok->whereDate('stok_tanggal', $request->filter_stok);
+        }
 
-        return DataTables::of($supplier)
+        return DataTables::of($stok)
             // Menambahkan kolom index / no urut (default nama kolom: DT_RowIndex)
             ->addIndexColumn()
-            ->addColumn('aksi', function ($supplier) {
+            ->addColumn('aksi', function ($stok) {
                 // Menambahkan kolom aksi
-                $btn = '<button onclick="modalAction(\''.url('/supplier/' . $supplier->supplier_id . '/show_ajax').'\')" class="btn btn-info btn-sm">Detail</button> ';
-                $btn .= '<button onclick="modalAction(\''.url('/supplier/' . $supplier->supplier_id . '/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button> ';
-                $btn .= '<button onclick="modalAction(\''.url('/supplier/' . $supplier->supplier_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button> ';
-
+                $btn = '<button onclick="modalAction(\''.url('/stok/' . $stok->stok_id . '/show_ajax').'\')" class="btn btn-info btn-sm">Detail</button> ';
+                $btn .= '<button onclick="modalAction(\''.url('/stok/' . $stok->stok_id . '/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button> ';
+                $btn .= '<button onclick="modalAction(\''.url('/stok/' . $stok->stok_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button> ';
                 
                 return $btn;
             })
@@ -48,29 +53,34 @@ class SupplierController extends Controller
             ->make(true);
     }
 
-
     public function show(string $id)
     {
-        $supplier = SupplierModel::with('supplier')->find($id);
+        $stok = StokModel::with('barang', 'stok')->find($id);
 
         $breadcrumb = (object) [
-            'title' => 'Detail Supplier',
-            'list' => ['Home', 'Supplier', 'Detail']
+            'title' => 'Detail Stok',
+            'list' => ['Home', 'Stok', 'Detail']
         ];
 
         $page = (object) [
-            'title' => 'Detail Supplier'
+            'title' => 'Detail Stok'
         ];
-        $activeMenu = 'supplier'; // set menu yang sedang aktif
+        $activeMenu = 'stok'; // set menu yang sedang aktif
+        
 
-        return view('supplier.show', ['breadcrumb' => $breadcrumb, 'page' => $page, 'supplier' => $supplier, 'activeMenu' => $activeMenu]);
+        return view('stok.show', ['breadcrumb' => $breadcrumb, 'page' => $page, 'stok' => $stok, 'activeMenu' => $activeMenu]);
     }
 
-    // jobsheet 6
-    public function create_ajax(){
-        $supplier = SupplierModel::select('supplier_kode', 'supplier_nama')->get();
+    public function show_ajax(string $id){
+        $stok = StokModel::find($id);
+        return view('stok.show_ajax', ['stok' => $stok]);
+    }
 
-        return view('supplier.create_ajax');
+    public function create_ajax(){
+        $stok = BarangModel::select('barang_id', 'barang_nama')->get();
+        $user = UserModel::select('user_id', 'nama')->get();
+
+        return view('stok.create_ajax')->with('barang', $stok, 'user', $user);
     }
 
     public function store_ajax ( Request $request ) {
@@ -79,10 +89,12 @@ class SupplierController extends Controller
         if ( $request->ajax() || $request->wantsJson() ) {
     
             $rules = [
-                'supplier_kode' => 'required|string|max:10',
-                'supplier_nama' => 'required|string|max:50',
-                'alamat' => 'required|string|max:200'
+                'barang_id'     => 'required|integer|exists:m_barang,id', // validasi foreign key
+                'nama'          => 'required|string|min:2|max:100',
+                'stok_tanggal'  => 'required|date',
+                'stok_jumlah'   => 'required|numeric|min:1'
             ];
+            
     
             // use Illuminate\Support\Facades\Validator;
             $validator = Validator::make($request->all(), $rules);
@@ -91,26 +103,28 @@ class SupplierController extends Controller
                 return response()->json([
                     'status' => false, // response status, false: error/gagal, true: berhasil
                     'message' => 'Validasi Gagal',
+                    // 'errors' => $validator->errors()
                     'msgField' => $validator->errors(), // pesan error validasi
                 ]);
             }
     
-            SupplierModel::create($request->all());
+            StokModel::create($request->all());
     
             return response()->json([
                 'status' => true,
-                'message' => 'Data user berhasil disimpan'
+                'message' => 'Data barang berhasil disimpan'
             ]);
         }
     
-        redirect('/');
+        redirect('/stok');
     }
-
+    
     public function edit_ajax(string $id)
     {
-        $supplier = SupplierModel::find($id);
+        $stok = StokModel::find($id);
+        $user = UserModel::select('user_id', 'username')->get();
 
-        return view('supplier.edit_ajax', ['supplier' => $supplier]);
+        return view('stok.edit_ajax', ['stok' => $stok, 'user' => $user]);
     }
 
     public function update_ajax(Request $request, $id)
@@ -118,9 +132,11 @@ class SupplierController extends Controller
         // Cek apakah request berasal dari AJAX
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
-                'supplier_kode' => 'required|string|max:50',
-                'supplier_nama' => 'required|string|max:50',
-                'alamat' => 'required|string|max:200'
+                'kategori_id' => 'required|integer',
+                'barang_kode' => 'required|string|min:1|unique:m_barang,barang_kode,' . $id . ',barang_id',
+                'barang_nama' => 'required|string|max:100',
+                'harga_beli' => 'required|string|max:30',
+                'harga_jual' => 'required|string|max:30'
             ];
 
             // Validasi input
@@ -134,14 +150,14 @@ class SupplierController extends Controller
             }
 
             // Cek apakah user dengan ID tersebut ada
-            $supplier = SupplierModel::find($id);
-            if ($supplier) {
+            $barang = BarangModel::find($id);
+            if ($barang) {
                 // Jika password tidak diisi, hapus dari request agar tidak terupdate
                 if (!$request->filled('password')) {
                     $request->request->remove('password');
                 }
 
-                $supplier->update($request->all());
+                $barang->update($request->all());
                 return response()->json([
                     'status' => true,
                     'message' => 'Data berhasil diupdate'
@@ -158,18 +174,18 @@ class SupplierController extends Controller
     }
 
     public function confirm_ajax(string $id){
-        $supplier = SupplierModel::find($id);
-        return view('supplier.confirm_ajax', ['supplier' => $supplier]);
+        $stok = StokModel::find($id);
+        return view('stok.confirm_ajax', ['stok' => $stok]);
     }
 
     public function delete_ajax(Request $request, $id)
     {
         // cek apakah request dari ajax
         if ($request->ajax() || $request->wantsJson()) {
-            $supplier = SupplierModel::find($id);
+            $stok = BarangModel::find($id);
 
-            if ($supplier) {
-                $supplier->delete();
+            if ($stok) {
+                $stok->delete();
                 return response()->json([
                     'status' => true,
                     'message' => 'Data berhasil dihapus'
@@ -185,8 +201,6 @@ class SupplierController extends Controller
         return redirect('/');
     }
 
-    public function show_ajax(string $id){
-        $supplier = SupplierModel::find($id);
-        return view('supplier.show_ajax', ['supplier' => $supplier]);
-    }
+
+    
 }

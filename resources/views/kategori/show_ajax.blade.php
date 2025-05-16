@@ -17,9 +17,8 @@
     </div>
 </div>
 @else
-<form action="{{ url('/kategori/' . $kategori->kategori_id . '/delete_ajax') }}" method="POST" id="form-delete">
+<form id="form-show_ajax">
     @csrf
-    @method('DELETE')
     <div id="modal-master" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -29,10 +28,6 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="alert alert-warning">
-                    <h5><i class="icon fas fa-ban"></i> Konfirmasi !!!</h5>
-                    Apakah Anda ingin menghapus data seperti di bawah ini?
-                </div>
                 <table class="table table-sm table-bordered table-striped">
                     <tr>
                         <th class="text-right col-3">ID</th>
@@ -44,20 +39,19 @@
                     </tr>
                     <tr>
                         <th class="text-right col-3">Nama Kategori</th>
-                        <td class="col-9">{{ $kategori->kategori_nama }}</td>
+                        <td class="col-9">{{ $kategori->kategori_kode }}</td>
                     </tr>
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-warning">Batal</button>
-                <button type="submit" class="btn btn-primary">Ya, Hapus</button>
+                <button type="button" data-dismiss="modal" class="btn btn-warning">Keluar</button>
             </div>
         </div>
     </div>
 </form>
 <script>
     $(document).ready(function() {
-        $("#form-delete").validate({
+        $("#form-show_ajax").validate({
             rules: {},
             submitHandler: function(form) {
                 $.ajax({

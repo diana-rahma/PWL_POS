@@ -29,6 +29,7 @@
         </div>
     </div>
 </form>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
 
 <script>
     $(document).ready(function() {
@@ -37,11 +38,11 @@
                 file_barang: {
                     required: true,
                     extension: "xlsx"
-                },
+                }
             },
             submitHandler: function(form) {
                 var formData = new FormData(form); // Jadikan form ke FormData untuk menghandle file
-
+                
                 $.ajax({
                     url: form.action,
                     type: form.method,
@@ -49,14 +50,14 @@
                     processData: false, // setting processData dan contentType ke false, untuk menghandle file
                     contentType: false,
                     success: function(response) {
-                        if (response.status) { // jika sukses
+                        if(response.status){ // jika sukses
                             $('#myModal').modal('hide');
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Berhasil',
                                 text: response.message
                             });
-                            tableBarang.ajax.reload(); //reload datatable
+                            tableBarang.ajax.reload(); // reload datatable
                         } else { // jika error
                             $('.error-text').text('');
                             $.each(response.msgField, function(prefix, val) {
@@ -84,5 +85,5 @@
                 $(element).removeClass('is-invalid');
             }
         });
-    });
+    });
 </script>

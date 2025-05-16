@@ -5,10 +5,10 @@
     <div class="card-header">
         <h3 class="card-title">{{ $page->title }}</h3>
         <div class="card-tools">
-            <button onclick="modalAction('{{ url('/barang/import') }}')" class="btn btn-sm btn-info mt-1">Import Barang</button>
-            <a href="{{ url('/barang/export_excel') }}" class="btn btn-sm btn-primary mt-1"><i class="fa fa-file-excel"></i> Export Barang</a>
-            <a href="{{ url('/barang/export_pdf') }}" class="btn btn-sm btn-warning mt-1"><i class="fa fa-file-pdf"></i> Export Barang</a>
-            <button onclick="modalAction('{{ url('/barang/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
+            <button onclick="modalAction('{{ url('/transaksi/import') }}')" class="btn btn-sm btn-info mt-1">Import Stok</button>
+            <a href="{{ url('/transaksi/export_excel') }}" class="btn btn-sm btn-primary mt-1"><i class="fa fa-file-excel"></i> Export Stok</a>
+            <a href="{{ url('/transaksi/export_pdf') }}" class="btn btn-sm btn-warning mt-1"><i class="fa fa-file-pdf"></i> Export Stok</a>
+            <button onclick="modalAction('{{ url('/transaksi/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
         </div>
     </div>
 
@@ -20,33 +20,28 @@
                     <div class="form-group form-group-sm row text-sm mb-0">
                         <label for="filter_date" class="col-md-1 col-form-label">Filter</label>
                         <div class="col-md-3">
-                            <select name="filter_kategori" class="form-control form-control-sm filter_kategori">
-                                <option value="">- Semua -</option>
-                                @foreach($kategori as $l)
-                                    <option value="{{ $l->kategori_id }}">{{ $l->kategori_nama }}</option>
-                                @endforeach
-                            </select>
-                            <small class="form-text text-muted">Kategori Barang</small>
+                            <input type="date" name="filter_stok" class="form-control form-control-sm filter_stok" />
+                            <small class="form-text text-muted">Stok Tanggal</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
         @if (session('error'))
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
-        <table class="table table-bordered table-striped table-hover table-sm" id="table_barang">
+        <table class="table table-bordered table-striped table-hover table-sm" id="table_transaksi">
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Kode Barang</th>
-                    <th>Nama Barang</th>
-                    <th>Harga Beli</th>
-                    <th>Harga Jual</th>
-                    <th>Kategori</th>
+                    <th>Nama User</th>
+                    <th>Pembeli</th>
+                    <th>Kode Penjualan</th>
+                    <th>Tanggal Penjualan</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -67,18 +62,18 @@
         });
         }
 
-        var dataBarang;
+        var dataStok;
         $(document).ready(function(){
-            dataBarang = $('#table_barang').DataTable({
+            dataStok = $('#table_transaksi').DataTable({
                 // serverSide: true, jika ingin menggunakan server side processing
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    "url": "{{ url('barang/list') }}",
+                    "url": "{{ url('transaksi/list') }}",
                     "dataType": "json",
                     "type": "POST",
                     "data": function(d) {
-                        d.filter_kategori = $('.filter_kategori').val();
+                        d.filter_stok = $('.filter_transaksi').val();
                     }
                 },
                 columns: [
@@ -91,59 +86,57 @@
                         searchable: false
                     },{
                         // mengambil data level hasil dari ORM berelasi
-                        data: "barang_kode",
+                        data: "user.username",
                         className: "",
-                        width: "10%",
+                        width: "20%",
                         orderable: true,
                         searchable: true
                     },{
-                        data: "barang_nama",
+                        data: "pembeli",
                         className: "",
-                        width: "25%",
+                        width: "15%",
                         orderable: true,
                         searchable: true,
                     },{
-                        data: "harga_beli",
+                        data: "penjualan_kode",
                         className: "",
-                        width: "13%",
-                        orderable: true,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            return new Intl.NumberFormat('id-ID').format(data);
-                        }
-                    },{
-                        data: "harga_jual",
-                        className: "",
-                        width: "13%",
-                        orderable: true,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            return new Intl.NumberFormat('id-ID').format(data);
-                        }
-                    },{
-                        data: "kategori.kategori_nama",
-                        className: "",
-                        width: "17%",
+                        width: "15%",
                         orderable: true,
                         searchable: false
                     },{
+                        data: "penjualan_tanggal",
+                        className: "",
+                        width: "15%",
+                        orderable: true,
+                        searchable: true,
+                        render: function(data, type, row) {
+                            // konversi data menjadi objek tanggal
+                            let date = new Date(data);
+                            // return dalam format lokal (Indonesia)
+                            return date.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric'
+                            });
+                        }
+                    },{
                         data: "aksi",
                         className: "text-center",
-                        width: "27%",
+                        width: "20%",
                         orderable: false,
                         searchable: false
                     }
                 ]
             });
 
-            $('#table-barang_filter input').unbind().bind().on('keyup', function(e) {
+            $('#table-stok_filter input').unbind().bind().on('keyup', function(e) {
                 if (e.keyCode == 13) { // enter key
-                    tableBarang.search(this.value).draw();
+                    tableStok.search(this.value).draw();
                 }
             });
 
-            $('.filter_kategori').change(function() {
-                tableBarang.draw();
+            $('.filter_stok').change(function() {
+                tableStok.draw();
             });
         });
     </script>
